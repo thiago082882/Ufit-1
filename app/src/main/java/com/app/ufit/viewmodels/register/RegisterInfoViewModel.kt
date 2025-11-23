@@ -28,6 +28,7 @@ class RegisterInfoViewModel @Inject constructor(
 
     fun registerUser(user: User) {
         load.postValue(true)
+
         usersProvider.register(user)?.enqueue(object : Callback<ResponseHttp> {
             override fun onResponse(
                 call: Call<ResponseHttp>,
@@ -37,26 +38,32 @@ class RegisterInfoViewModel @Inject constructor(
                 success.postValue(true)
                 load.postValue(false)
 
+                val msg = response.body()?.message ?: "Registro realizado com sucesso."
+
                 Toast.makeText(
                     getApplication(),
-                    response.body()?.message,
+                    msg,
                     Toast.LENGTH_LONG
                 ).show()
-                Log.d(ContentValues.TAG, "Response: ${response}")
+
+                Log.d(ContentValues.TAG, "Response: $response")
                 Log.d(ContentValues.TAG, "Body: ${response.body()}")
             }
 
             override fun onFailure(call: Call<ResponseHttp>, t: Throwable) {
                 load.postValue(false)
-                Log.d(ContentValues.TAG, "Ocorreu um error ${t.message}")
+                val error = "Ocorreu um erro: ${t.message ?: "desconhecido"}"
+
+                Log.d(ContentValues.TAG, error)
                 Toast.makeText(
                     getApplication(),
-                    "Ocorreu um error ${t.message}",
+                    error,
                     Toast.LENGTH_LONG
                 ).show()
             }
         })
     }
+
 
     fun login(email: String, password: String) {
         usersProvider.login(email, password)?.enqueue(object : Callback<ResponseHttp> {
